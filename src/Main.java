@@ -1,25 +1,34 @@
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class Main {
-    static ArrayList<Blogger> bloggers = new ArrayList<>();
-    static HashMap<String, String> nicks = new HashMap<>();
-    static HashMap<String, KeywordAuthor> topics = new HashMap<>();
-    static HashMap<Date, Integer> subs = new HashMap<>();
+    public static void main(String[] args) throws ParseException {
+        var df = DateFormat.getDateInstance(DateFormat.SHORT, new Locale("ru"));
 
-    static void clear() {
-        nicks.clear();
-        topics.clear();
-        subs.clear();
-    }
-    public static void main(String[] args) {
+        var googlebot = new KeywordAuthor("google analytics", "bot");
+        var me = new KeywordAuthor("Vladimir", "yours truly");
+
+        var bloggers = new ArrayList<Blogger>();
+        Blogger x;
+
         //Алексей Пивоваров
-        nicks.put("youtube", "Редакция");
-        nicks.put("tg", "Пивоваров (Редакция)");
-        topics.put("news", new KeywordAuthor("google analytics", "bot"));
-        subs.put(new Date(2023, 5, 1), 975000);
-        bloggers.add(new Blogger(nicks, topics, subs));
-        clear();
+        x = new Blogger();
+        x.nicks.put("youtube", "Редакция");
+        x.regDates.put("youtube", df.parse("22.08.2018"));
+        x.nicks.put("tg", "Пивоваров (Редакция)");
+        x.regDates.put("tg", df.parse(""));
+        x.topics.put("news", googlebot);
+        x.subs.get("youtube").put(df.parse("01.05.2023"), 975000);
+        bloggers.add(x);
+
+        //3b1b
+        x = new Blogger();
+        x.nicks.put("youtube", "Соточка по русскому");
+        x.nicks.put("vk", "Ляйсан Хутова");
+        bloggers.add(x);
     }
 }
