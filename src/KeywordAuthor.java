@@ -9,6 +9,11 @@ public class KeywordAuthor {
         this.info = info;
     }
 
+    @Override
+    public String toString() {
+        return "KeywordAuthor " + name + ", info: " + info;
+    }
+
     public String name;
     public String info;
 }
