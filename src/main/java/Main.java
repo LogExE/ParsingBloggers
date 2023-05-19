@@ -1,11 +1,8 @@
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
-import java.text.ParseException;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class Main {
     public static void gen() throws IOException {
@@ -112,24 +109,32 @@ public class Main {
 
         bloggers.add(x);
 
-        // 9.
-        x = new Blogger();
-
-        //x.addNet("", "", "");
-
-        //x.addKeyword("", me);
-
-        //bloggers.add(x);
+        var mapper = new ObjectMapper().findAndRegisterModules();
 
         try (var writer = new BufferedWriter(new FileWriter("output.txt"))) {
             for (Blogger blgr : bloggers) {
-                writer.append(new JSONObject(blgr).toString());
+                writer.append(mapper.writeValueAsString(blgr));
                 writer.append('\n');
             }
         }
     }
+
+    public static ArrayList<Blogger> read() throws IOException {
+        var bloggers = new ArrayList<Blogger>();
+        var mapper = new ObjectMapper().findAndRegisterModules();
+        try (var reader = new BufferedReader(new FileReader("output.txt"))) {
+            String inp;
+            while ((inp = reader.readLine()) != null) {
+                var blgr = mapper.readValue(inp, Blogger.class);
+                bloggers.add(blgr);
+            }
+        }
+        return bloggers;
+    }
     public static void main(String[] args) throws IOException {
         gen();
-
+        var bloggers = read();
+        for (Blogger blgr : bloggers)
+            System.out.println(blgr);
     }
 }
