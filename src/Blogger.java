@@ -3,6 +3,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Blogger {
     public Blogger() {
@@ -20,6 +21,20 @@ public class Blogger {
         this.nicks = nicks;
         this.topics = topics;
         this.subs = subs;
+    }
+
+    public void addNet(String net, String nick, String regdate) {
+        nicks.put(net, nick);
+        regDates.put(net, LocalDate.parse(regdate));
+        subs.put(net, new TreeMap<>());
+    }
+
+    public void aboutSubs(String net, String date, Long count) {
+        subs.get(net).put(LocalDate.parse(date), count);
+    }
+
+    public void addKeyword(String keyword, KeywordAuthor author) {
+        topics.put(keyword, author);
     }
 
     @Override
