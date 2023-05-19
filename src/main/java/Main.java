@@ -5,6 +5,14 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
+    /*
+    Необходимо создать класс Блоггер с указанием списка никнеймов и соответствующих социальных сетей с датами начала ведения,
+    списка тем, которые он затрагивает или какие ассоциации вызывает, с указанием авторства этого ключевого слова,
+    списка даты-времени и количестве подписчиков на этот момент.
+    Создать дополнительные классы: Автор ключевого слова о блоггере.
+     */
+    public static final String FILE_NAME = "output.txt";
+
     public static void gen() throws IOException {
         var googlebot = new KeywordAuthor("google analytics", "bot");
         var me = new KeywordAuthor("Vladimir", "that's me");
@@ -109,9 +117,61 @@ public class Main {
 
         bloggers.add(x);
 
+        // 9. 3Blue1Brown
+        x = new Blogger();
+
+        x.addNet("reddit", "3Blue1Brown", "2016-11-05");
+        x.aboutSubs("reddit", "2023-05-19", 40500L);
+
+        x.addNet("youtube", "3blue1brown", "2015-03-04");
+        x.aboutSubs("youtube", "2023-05-19", 5190000L);
+
+        x.addKeyword("educational", googlebot);
+        x.addKeyword("algebra", googlebot);
+        x.addKeyword("theory of probability", googlebot);
+        x.addKeyword("Python Manim", googlebot);
+
+        bloggers.add(x);
+
+        // 10. Fighter PL
+        x = new Blogger();
+
+        x.addNet("youtube", "FighterPL", "2009-04-23");
+        x.aboutSubs("youtube", "2023-05-19", 461000L);
+
+        x.addNet("twitch", "fighterpl", "2010-11-08");
+        x.aboutSubs("twitch", "2023-05-19", 71015L);
+
+        x.addKeyword("dark souls", googlebot);
+        x.addKeyword("tryhard gamer", uknwn);
+
+        bloggers.add(x);
+
+        // 11. Саша Квашеная
+        x = new Blogger();
+
+        x.addNet("youtube", "kvashenaya", "2013-09-23");
+        x.aboutSubs("youtube", "2023-05-19", 1940000L);
+
+        x.addNet("tg", "kvashenayakto", "2019-06-24");
+        x.aboutSubs("tg", "2023-05-19", 38414L);
+
+        x.addKeyword("music", googlebot);
+        x.addKeyword("безбашенная", uknwn);
+
+        bloggers.add(x);
+
+        // 12. kitty0706
+        x = new Blogger();
+
+        x.addNet("youtube", "kitty0706", "2007-04-14");
+        x.aboutSubs("youtube", "2023-05-19", 592000L);
+
+        bloggers.add(x);
+
         var mapper = new ObjectMapper().findAndRegisterModules();
 
-        try (var writer = new BufferedWriter(new FileWriter("output.txt"))) {
+        try (var writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
             for (Blogger blgr : bloggers) {
                 writer.append(mapper.writeValueAsString(blgr));
                 writer.append('\n');
@@ -122,7 +182,7 @@ public class Main {
     public static ArrayList<Blogger> read() throws IOException {
         var bloggers = new ArrayList<Blogger>();
         var mapper = new ObjectMapper().findAndRegisterModules();
-        try (var reader = new BufferedReader(new FileReader("output.txt"))) {
+        try (var reader = new BufferedReader(new FileReader(FILE_NAME))) {
             String inp;
             while ((inp = reader.readLine()) != null) {
                 var blgr = mapper.readValue(inp, Blogger.class);
