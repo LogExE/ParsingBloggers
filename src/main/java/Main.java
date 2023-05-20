@@ -2,7 +2,13 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Main {
     /*
@@ -142,6 +148,7 @@ public class Main {
         x.addNet("twitch", "fighterpl", "2010-11-08");
         x.aboutSubs("twitch", "2023-05-19", 71015L);
 
+        x.addKeyword("games", googlebot);
         x.addKeyword("dark souls", googlebot);
         x.addKeyword("tryhard gamer", uknwn);
 
@@ -167,6 +174,10 @@ public class Main {
         x.addNet("youtube", "kitty0706", "2007-04-14");
         x.aboutSubs("youtube", "2023-05-19", 592000L);
 
+        x.addKeyword("entertainment", googlebot);
+        x.addKeyword("Garry's Mod", me);
+        x.addKeyword("farewell :c", me);
+
         bloggers.add(x);
 
         var mapper = new ObjectMapper().findAndRegisterModules();
@@ -191,10 +202,66 @@ public class Main {
         }
         return bloggers;
     }
+
     public static void main(String[] args) throws IOException {
         gen();
         var bloggers = read();
-        for (Blogger blgr : bloggers)
-            System.out.println(blgr);
+        //for (Blogger blgr : bloggers)
+        //    System.out.println(blgr);
+
+        Consumer<Blogger> printOutNicks = x -> System.out.println(x.getNicks());
+
+        System.out.println("Tasks with lambdas:");
+        System.out.println("1. Entertainment bloggers list");
+        bloggers
+                .stream()
+                .filter(x -> x.hasKeyword("entertainment")
+                        || x.hasKeyword("music")
+                        || x.hasKeyword("games"))
+                .forEach(printOutNicks);
+
+        System.out.println("2. Popular bloggers (subs >= 500K)");
+        long k = 500000;
+        var date = LocalDate.parse("2023-05-19");
+        bloggers
+                .stream()
+                .filter(b -> b
+                        .getSubs()
+                        .values().stream().map(m -> m.get(date))
+                        .map(m -> m == null ? 0 : m)
+                        .min(Long::compare).orElse(0L) >= k)
+                .forEach(printOutNicks);
+
+        System.out.println("3. Bloggers sorted by max subs");
+        // Используем ранее объявленную date
+        Function<Blogger, Long[]> subsSorted = x -> x
+                .getSubs()
+                .values().stream().map(m -> m.get(date)) // получили список подписчиков на момент date
+                .sorted(Comparator.reverseOrder()).toArray(Long[]::new);
+        bloggers
+                .stream()
+                .filter(b -> b
+                        .getSubs()
+                        .values().stream().map(m -> m.get(date))
+                        .filter(sub -> sub != null).count() != 0)
+                .sorted((b1, b2) -> Arrays.compare(subsSorted.apply(b1), subsSorted.apply(b2)))
+                .forEach(b -> System.out.printf("%s %s%n", b.getNicks(), Arrays.toString(subsSorted.apply(b))));
+
+        System.out.println("4. Bloggers sorted by sum of subs");
+        // Используем ранее объявленную date
+        Function<Blogger, Long> subsSum = b -> b
+                .getSubs()
+                .values().stream().map(m -> m.get(date)) // получили список подписчиков на момент date
+                .map(m -> m == null ? 0 : m)
+                .reduce(0L, Long::sum);
+        bloggers
+                .stream()
+                .filter(b -> b
+                        .getSubs()
+                        .values().stream()
+                        .map(m -> m.get(date))
+                        .filter(sub -> sub != null).count() != 0) //
+                .sorted(Comparator.comparing(subsSum::apply))
+                .forEach(b -> System.out.printf("%s %d%n", b.getNicks(), subsSum.apply(b)));
     }
 }

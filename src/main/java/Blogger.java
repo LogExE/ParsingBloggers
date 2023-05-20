@@ -10,16 +10,16 @@ public class Blogger {
         nicks = new HashMap<>();
         regDates = new HashMap<>();
         subs = new HashMap<>();
-        topics = new HashMap<>();
+        keywords = new HashMap<>();
     }
 
     public Blogger(Map<String, String> nicks,
                    Map<String, LocalDate> regDates,
                    Map<String, SortedMap<LocalDate, Long>> subs,
-                   Map<String, KeywordAuthor> topics) {
+                   Map<String, KeywordAuthor> keywords) {
         this.regDates = regDates;
         this.nicks = nicks;
-        this.topics = topics;
+        this.keywords = keywords;
         this.subs = subs;
     }
 
@@ -34,7 +34,11 @@ public class Blogger {
     }
 
     public void addKeyword(String keyword, KeywordAuthor author) {
-        topics.put(keyword, author);
+        keywords.put(keyword, author);
+    }
+
+    public boolean hasKeyword(String keyword) {
+        return keywords.containsKey(keyword);
     }
 
     @Override
@@ -53,10 +57,10 @@ public class Blogger {
                 } else sb.append("No info about subs\n\n");
             }
         } else sb.append("No data...\n\n");
-        if (topics.size() != 0) {
+        if (keywords.size() != 0) {
             sb.append("Keywords:\n");
-            for (String keyword : topics.keySet())
-                sb.append(keyword).append(", by ").append(topics.get(keyword)).append('\n');
+            for (String keyword : keywords.keySet())
+                sb.append(keyword).append(", by ").append(keywords.get(keyword)).append('\n');
         }
         else sb.append("No keywords\n");
         return sb.toString();
@@ -65,7 +69,7 @@ public class Blogger {
     private Map<String, String> nicks;
     private Map<String, LocalDate> regDates;
     private Map<String, SortedMap<LocalDate, Long>> subs;
-    private Map<String, KeywordAuthor> topics;
+    private Map<String, KeywordAuthor> keywords;
 
     public Map<String, String> getNicks() {
         return nicks;
@@ -91,11 +95,11 @@ public class Blogger {
         this.subs = subs;
     }
 
-    public Map<String, KeywordAuthor> getTopics() {
-        return topics;
+    public Map<String, KeywordAuthor> getKeywords() {
+        return keywords;
     }
 
-    public void setTopics(Map<String, KeywordAuthor> topics) {
-        this.topics = topics;
+    public void setKeywords(Map<String, KeywordAuthor> keywords) {
+        this.keywords = keywords;
     }
 }
