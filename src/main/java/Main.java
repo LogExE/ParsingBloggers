@@ -1,4 +1,5 @@
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
@@ -181,25 +182,13 @@ public class Main {
         bloggers.add(x);
 
         var mapper = new ObjectMapper().findAndRegisterModules();
-
-        try (var writer = new BufferedWriter(new FileWriter(FILE_NAME))) {
-            for (Blogger blgr : bloggers) {
-                writer.append(mapper.writeValueAsString(blgr));
-                writer.append('\n');
-            }
-        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(FILE_NAME), bloggers);
     }
 
     public static ArrayList<Blogger> read() throws IOException {
-        var bloggers = new ArrayList<Blogger>();
+        ArrayList<Blogger> bloggers;
         var mapper = new ObjectMapper().findAndRegisterModules();
-        try (var reader = new BufferedReader(new FileReader(FILE_NAME))) {
-            String inp;
-            while ((inp = reader.readLine()) != null) {
-                var blgr = mapper.readValue(inp, Blogger.class);
-                bloggers.add(blgr);
-            }
-        }
+        bloggers = mapper.readValue(new File(FILE_NAME), new TypeReference<>() {});
         return bloggers;
     }
 
