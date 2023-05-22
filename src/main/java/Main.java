@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class Main {
     /*
@@ -198,8 +199,6 @@ public class Main {
         //for (Blogger blgr : bloggers)
         //    System.out.println(blgr);
 
-        Consumer<Blogger> printOutNicks = x -> System.out.println(x.getNicks());
-
         System.out.println("Tasks with lambdas:");
         System.out.println("1. Entertainment bloggers list");
         bloggers
@@ -207,49 +206,45 @@ public class Main {
                 .filter(x -> x.hasKeyword("entertainment")
                         || x.hasKeyword("music")
                         || x.hasKeyword("games"))
-                .forEach(printOutNicks);
+                .forEach(x -> System.out.println(x.getNicks()));
 
         System.out.println("2. Popular bloggers (subs >= 500K)");
         long k = 500000;
         var date = LocalDate.parse("2023-05-19");
+
+        // подписчики на момент date
+        Function<Blogger, Stream<Long>> subsToDate = b -> b
+                .getSubs()
+                .values().stream().map(m -> m.get(date));
+
+        // оставляем тех, у кого хоть что-то зафиксировано
+        Function<Stream<Blogger>, Stream<Blogger>> filterPresent = sb -> sb.filter(
+                b -> subsToDate.apply(b)
+                .filter(sub -> sub != null).count() != 0);
+
         bloggers
                 .stream()
-                .filter(b -> b
-                        .getSubs()
-                        .values().stream().map(m -> m.get(date))
-                        .map(m -> m == null ? 0 : m)
-                        .min(Long::compare).orElse(0L) >= k)
-                .forEach(printOutNicks);
+                .filter(b -> subsToDate.apply(b)
+                        .map(m -> m == null ? -1 : m)
+                        .min(Long::compare).orElse(-1L) >= k)
+                .forEach(x -> System.out.printf("%s %d%n", x.getNicks(), 0));
 
         System.out.println("3. Bloggers sorted by max subs");
         // Используем ранее объявленную date
-        Function<Blogger, Long[]> subsSorted = x -> x
-                .getSubs()
-                .values().stream().map(m -> m.get(date)) // получили список подписчиков на момент date
+        Function<Blogger, Long[]> subsSorted = x -> subsToDate.apply(x)
                 .sorted(Comparator.reverseOrder()).toArray(Long[]::new);
-        bloggers
-                .stream()
-                .filter(b -> b
-                        .getSubs()
-                        .values().stream().map(m -> m.get(date))
-                        .filter(sub -> sub != null).count() != 0)
+        filterPresent.apply(bloggers
+                .stream())
                 .sorted((b1, b2) -> Arrays.compare(subsSorted.apply(b1), subsSorted.apply(b2)))
                 .forEach(b -> System.out.printf("%s %s%n", b.getNicks(), Arrays.toString(subsSorted.apply(b))));
 
         System.out.println("4. Bloggers sorted by sum of subs");
         // Используем ранее объявленную date
-        Function<Blogger, Long> subsSum = b -> b
-                .getSubs()
-                .values().stream().map(m -> m.get(date)) // получили список подписчиков на момент date
-                .map(m -> m == null ? 0 : m)
+        Function<Blogger, Long> subsSum = b -> subsToDate.apply(b)
+                .filter(m -> m != null)
                 .reduce(0L, Long::sum);
-        bloggers
-                .stream()
-                .filter(b -> b
-                        .getSubs()
-                        .values().stream()
-                        .map(m -> m.get(date))
-                        .filter(sub -> sub != null).count() != 0) //
+        filterPresent.apply(bloggers
+                .stream())
                 .sorted(Comparator.comparing(subsSum::apply))
                 .forEach(b -> System.out.printf("%s %d%n", b.getNicks(), subsSum.apply(b)));
     }
