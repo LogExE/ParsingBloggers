@@ -203,10 +203,10 @@ public class Main {
         System.out.println("1. Entertainment bloggers list");
         bloggers
                 .stream()
-                .filter(x -> x.hasKeyword("entertainment")
-                        || x.hasKeyword("music")
-                        || x.hasKeyword("games"))
-                .forEach(x -> System.out.println(x.getNicks()));
+                .filter(b -> b.hasKeyword("entertainment")
+                        || b.hasKeyword("music")
+                        || b.hasKeyword("games"))
+                .forEach(b -> System.out.println(b.getNicks()));
 
         System.out.println("2. Popular bloggers (subs >= 500K)");
         long k = 500000;
@@ -217,22 +217,23 @@ public class Main {
                 .getSubs()
                 .values().stream().map(m -> m.get(date));
 
-        // оставляем тех, у кого хоть что-то зафиксировано
-        Function<Stream<Blogger>, Stream<Blogger>> filterPresent = sb -> sb.filter(
-                b -> subsToDate.apply(b)
-                .filter(sub -> sub != null).count() != 0);
-
         bloggers
                 .stream()
                 .filter(b -> subsToDate.apply(b)
                         .map(m -> m == null ? -1 : m)
                         .min(Long::compare).orElse(-1L) >= k)
-                .forEach(x -> System.out.printf("%s %d%n", x.getNicks(), 0));
+                .forEach(b -> System.out.printf("%s %s%n", b.getNicks(), Arrays.toString(subsToDate.apply(b).toArray(Long[]::new))));
 
         System.out.println("3. Bloggers sorted by max subs");
-        // Используем ранее объявленную date
+        // По ранее объявленной date получить отсортированный список подписчиков
         Function<Blogger, Long[]> subsSorted = x -> subsToDate.apply(x)
                 .sorted(Comparator.reverseOrder()).toArray(Long[]::new);
+
+        // оставляем блогеров, у кого хоть что-то зафиксировано
+        Function<Stream<Blogger>, Stream<Blogger>> filterPresent = sb -> sb.filter(
+                b -> subsToDate.apply(b)
+                        .filter(sub -> sub != null).count() != 0);
+
         filterPresent.apply(bloggers
                 .stream())
                 .sorted((b1, b2) -> Arrays.compare(subsSorted.apply(b1), subsSorted.apply(b2)))
@@ -243,6 +244,7 @@ public class Main {
         Function<Blogger, Long> subsSum = b -> subsToDate.apply(b)
                 .filter(m -> m != null)
                 .reduce(0L, Long::sum);
+
         filterPresent.apply(bloggers
                 .stream())
                 .sorted(Comparator.comparing(subsSum::apply))
